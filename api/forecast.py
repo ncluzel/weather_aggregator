@@ -47,11 +47,21 @@ class handler(BaseHTTPRequestHandler):
         except Exception as e:
             data_openweather = {"error": str(e)}
 
+        # Appel à OpenMeteo
+        try:
+            # rajouter des paramètres sur lat et long si jamais on veut autre chose que Cuges
+            url_openmeteo = f"https://api.open-meteo.com/v1/forecast?latitude=43.2761&longitude=5.6996&hourly=temperature_2m,precipitation,rain,snowfall,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,apparent_temperature&models=meteofrance_seamless"
+            resp_openmeteo = requests.get(url_openmeteo, timeout=5)
+            data_openmeteo = resp_openmeteo.json()
+        except Exception as e:
+            data_openmeteo = {"error": str(e)}
+
         # Construire la réponse combinée
         response_data = {
             "city": city,
             "weatherapi": data_weatherapi,
-            "openweather": data_openweather
+            "openweather": data_openweather,
+            "openmeteo" : data_openmeteo
         }
 
         # Envoyer la réponse
