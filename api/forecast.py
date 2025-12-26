@@ -31,6 +31,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"error": "API keys not set"}')
             return
 
+        """
         # Appel à WeatherAPI
         try:
             url_weatherapi = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHERAPI_KEY}&q={city}&days=2&aqi=no&alerts=no"
@@ -47,6 +48,8 @@ class handler(BaseHTTPRequestHandler):
         except Exception as e:
             data_openweather = {"error": str(e)}
 
+        """
+
         # Appel à OpenMeteo
         try:
             # rajouter des paramètres sur lat et long si jamais on veut autre chose que Cuges
@@ -59,8 +62,8 @@ class handler(BaseHTTPRequestHandler):
         # Construire la réponse combinée
         response_data = {
             "city": city,
-            "weatherapi": data_weatherapi,
-            "openweather": data_openweather,
+            #"weatherapi": data_weatherapi,
+            #"openweather": data_openweather,
             "openmeteo" : data_openmeteo
         }
 
