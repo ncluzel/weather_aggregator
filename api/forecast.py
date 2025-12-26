@@ -33,7 +33,7 @@ class handler(BaseHTTPRequestHandler):
 
         # Appel à WeatherAPI
         try:
-            url_weatherapi = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHERAPI_KEY}&q={city}&days=1&aqi=no&alerts=no"
+            url_weatherapi = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHERAPI_KEY}&q={city}&days=2&aqi=no&alerts=no"
             resp_weatherapi = requests.get(url_weatherapi, timeout=5)
             data_weatherapi = resp_weatherapi.json()
         except Exception as e:
