@@ -201,7 +201,7 @@ export function createSVGChart(data, options = {}) {
     lineBorderColor = '#000000'  // COULEUR DE LA BORDURE DE LA LIGNE (noir par défaut)
   } = options;
   
-  const limits = calculateAxisLimits(data, { yMargin: 2 });  // Marge de 1°C en haut et en bas
+  const limits = calculateAxisLimits(data, { yMargin: 4 });  // Marge de 1°C en haut et en bas
   
   // Ajuster les limites X pour afficher complètement la dernière bande horaire
   const adjustedLimits = { ...limits };
