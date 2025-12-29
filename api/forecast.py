@@ -12,8 +12,11 @@ class handler(BaseHTTPRequestHandler):
         params = parse.parse_qs(query)
         lat = params.get("lat", [None])[0]
         lon = params.get("lon", [None])[0]
-        url_openmeteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,precipitation,rain,snowfall,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,apparent_temperature&models=meteofrance_seamless"
 
+        model = "meteofrance_seamless"
+        queried_parameters = "temperature_2m,precipitation,rain,snowfall,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,apparent_temperature"
+        
+        url_openmeteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly={queried_parameters}&models={model}"
 
         if not lat or not lon:
             self.send_response(400)
