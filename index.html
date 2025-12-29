@@ -103,6 +103,7 @@
       background: white;
       max-width: 100%;
       width: 100%;
+      position: relative;
       /* Amélioration du scroll sur mobile */
       -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
@@ -111,6 +112,19 @@
     #chartContainer svg, #barChartContainer svg {
       display: block;
       min-width: 100%;
+    }
+
+    /* Overlay pour l'axe Y fixe */
+    .y-axis-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      background: white;
+      pointer-events: none;
+      border-right: 2px solid #333;
+      z-index: 10;
     }
 
     #averagesTable {
@@ -602,6 +616,12 @@
         barChartContainer.innerHTML = barSvg;
         barChartSection.classList.remove('hidden');
         
+        // Ajouter l'axe Y fixe pour le graphique des précipitations
+        setTimeout(() => {
+          createStickyYAxis('barChartContainer');
+          createStickyYAxis('chartContainer');
+        }, 100);
+
         // Calculer toutes les données pour le tableau consolidé
         const tempsAvgs = calculateTimeSlotAverages(normalizedData);
         const tempsApparentAvgs = calculateTimeSlotAverages(normalizedDataApparent);
@@ -726,6 +746,63 @@
       `;
       statsSection.classList.remove('hidden');
     }
+
+    // Fonction pour créer un axe Y qui reste fixe pendant le scroll
+    function createStickyYAxis(containerId) {
+      const container = document.getElementById(containerId);
+      const svg = container.querySelector('svg');
+      
+      if (!svg) return;
+      
+      // Supprimer l'ancien overlay s'il existe
+      const oldOverlay = container.querySelector('.y-axis-sticky');
+      if (oldOverlay) oldOverlay.remove();
+      
+      // Créer un canvas overlay pour l'axe Y
+      const overlay = document.createElement('div');
+      overlay.className = 'y-axis-sticky';
+      overlay.style.cssText = `
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80px;
+        height: ${svg.getAttribute('height')}px;
+        background: white;
+        pointer-events: none;
+        z-index: 10;
+        border-right: 2px solid #333;
+      `;
+      
+      // Créer un SVG pour l'axe Y uniquement
+      const axisHeight = svg.getAttribute('height');
+      const axisSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      axisSvg.setAttribute('width', '80');
+      axisSvg.setAttribute('height', axisHeight);
+      axisSvg.style.cssText = 'display: block;';
+      
+      // Copier les éléments de l'axe Y (graduations et labels)
+      const yAxisElements = svg.querySelectorAll('line[x1="55"], line[x1="60"], text[x="50"]');
+      yAxisElements.forEach(el => {
+        const clone = el.cloneNode(true);
+        axisSvg.appendChild(clone);
+      });
+      
+      // Copier le label "Axe Y"
+      const yLabel = svg.querySelector('text[transform*="rotate(-90"]');
+      if (yLabel) {
+        const labelClone = yLabel.cloneNode(true);
+        axisSvg.appendChild(labelClone);
+      }
+      
+      overlay.appendChild(axisSvg);
+      container.appendChild(overlay);
+      
+      // Gérer le scroll pour mettre à jour la position
+      container.addEventListener('scroll', () => {
+        overlay.style.transform = `translateX(${container.scrollLeft}px)`;
+      });
+    }
+    
   </script>
 </body>
 </html>
