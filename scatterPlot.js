@@ -166,8 +166,7 @@ function generateMidnightMarkers(limits, scaleX, chartTop, chartBottom) {
     const month = (currentMidnight.getMonth() + 1).toString().padStart(2, '0');
     
     markers.push(`
-      <line x1="${x}" y1="${chartTop}" x2="${x}" y2="${chartBottom}" stroke="#dc2626" stroke-width="2" opacity="0.6" />
-      <text x="${x + 5}" y="${chartTop + 20}" font-size="11" font-weight="bold" fill="#dc2626">${day}/${month}</text>
+      <line x1="${x}" y1="${chartTop}" x2="${x}" y2="${chartBottom}" stroke="#dc2626" stroke-width="4" opacity="0.6" />
     `);
     
     // Avancer de 24 heures
