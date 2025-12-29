@@ -509,9 +509,9 @@
         
         // Créer et afficher le graphique de température
         const svg = createSVGChart(normalizedData, {
-          height: 600,
+          height: 300,
           pointRadius: 12,
-          pixelsPerTick: 40,  // Réduit de 80 à 40 pour afficher 8h au lieu de 4h
+          pixelsPerTick: 30,  // Réduit de 80 à 40 pour afficher 8h au lieu de 4h
           showValueInPoint: true,
           colorByValue: true,
           strokeWidth: 2,
@@ -526,7 +526,7 @@
         
         // Créer et afficher l'histogramme des précipitations
         const barSvg = createBarChart(normalizedDataPrecipitation, {
-          height: 300,
+          height: 200,
           barColor: '#3b82f6',
           pixelsPerTick: 40  // Même réduction pour garder la cohérence
         });
