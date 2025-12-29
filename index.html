@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quelle couverture</title>
+  <title>Visualiseur de Nuage de Points</title>
   <style>
     * {
       margin: 0;
@@ -212,29 +212,180 @@
     .location-btn:active {
       transform: translateY(0);
     }
+    
+    /* ========================================
+       RESPONSIVE DESIGN - MOBILE
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+        border-radius: 8px;
+      }
+      
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 8px;
+      }
+      
+      .subtitle {
+        font-size: 0.9em;
+        margin-bottom: 20px;
+      }
+      
+      .upload-section {
+        padding: 15px;
+      }
+      
+      .upload-section p {
+        font-size: 0.95em;
+      }
+      
+      .location-btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      
+      .file-input-wrapper {
+        width: 100%;
+        text-align: center;
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+      
+      #fileName {
+        display: block;
+        margin-left: 0;
+        margin-top: 10px;
+        font-size: 0.9em;
+      }
+      
+      .section {
+        margin-top: 25px;
+      }
+      
+      .section h2 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+      }
+      
+      /* Graphiques scrollables horizontalement sur mobile */
+      #chartContainer, #barChartContainer {
+        max-width: 100vw;
+        margin-left: -15px;
+        margin-right: -15px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+      
+      /* Tableaux responsive */
+      #averagesTable table {
+        font-size: 0.75em;
+      }
+      
+      #averagesTable th,
+      #averagesTable td {
+        padding: 6px 4px;
+      }
+      
+      #dataTable {
+        font-size: 0.8em;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      .stat-card {
+        padding: 12px;
+      }
+      
+      .stat-label {
+        font-size: 0.75em;
+      }
+      
+      .stat-value {
+        font-size: 1.2em;
+      }
+      
+      .error {
+        padding: 12px;
+        font-size: 0.9em;
+      }
+    }
+    
+    /* Très petits écrans (< 400px) */
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.3em;
+      }
+      
+      .location-btn {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      
+      #averagesTable table {
+        font-size: 0.65em;
+      }
+      
+      #averagesTable th,
+      #averagesTable td {
+        padding: 4px 2px;
+      }
+    }
+    
+    /* Paysage mobile */
+    @media (max-width: 900px) and (orientation: landscape) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.6em;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📊 Quelle couverture ?</h1>
+    <h1>📊 Visualiseur de Nuage de Points</h1>
+    <p class="subtitle">Importez un fichier JSON pour visualiser vos données</p>
+    
     <div class="upload-section">
       <div style="margin-bottom: 20px;">
-        <p style="font-weight: 600; margin-bottom: 10px; color: #333;">Qui est-ce ?</p>
+        <p style="font-weight: 600; margin-bottom: 10px; color: #333;">Sélectionnez un emplacement :</p>
         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
           <button class="location-btn" data-lat="43.2761" data-lon="5.6996" data-name="Cuges-les-Pins">
-            📍 Fio
-          </button>
-          <button class="location-btn" data-lat="44.5216" data-lon="3.4998" data-name="Mende">
-            📍 Jade
-          </button>
-          <button class="location-btn" data-lat="44.5532" data-lon="3.5152" data-name="Alteyrac">
-            📍 Raïssa
+            📍 Cuges-les-Pins
           </button>
           <button class="location-btn" data-lat="48.8566" data-lon="2.3522" data-name="Paris">
-            📍 Nicolas
+            📍 Paris
           </button>
-          <button class="location-btn" data-lat="48.5815" data-lon="1.0711" data-name="Montpellier">
-            📍 Papa
+          <button class="location-btn" data-lat="43.2965" data-lon="5.3698" data-name="Marseille">
+            📍 Marseille
+          </button>
+          <button class="location-btn" data-lat="45.7640" data-lon="4.8357" data-name="Lyon">
+            📍 Lyon
+          </button>
+          <button class="location-btn" data-lat="43.6108" data-lon="3.8767" data-name="Montpellier">
+            📍 Montpellier
           </button>
         </div>
       </div>
@@ -352,6 +503,10 @@
         const normalizedDataApparent = normalizeData(rawData, keyConfigApparent);
         const normalizedDataWind = normalizeData(rawData, keyConfigWindGusts);
         
+        // Calculer les statistiques
+        const limits = calculateAxisLimits(normalizedData, { yMargin: 0 });
+        displayStats(normalizedData, limits);
+        
         // Créer et afficher le graphique de température
         const svg = createSVGChart(normalizedData, {
           height: 600,
@@ -395,6 +550,11 @@
         });
         averagesTable.innerHTML = consolidatedTable;
         averagesSection.classList.remove('hidden');
+        
+        // Créer et afficher le tableau
+        const table = createDataTable(normalizedData);
+        dataTable.innerHTML = table;
+        tableSection.classList.remove('hidden');
         
       } catch (error) {
         throw error;
