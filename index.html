@@ -189,6 +189,29 @@
     .temp-toggle:active {
       transform: translateY(0);
     }
+    
+    .location-btn {
+      padding: 12px 20px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3);
+    }
+    
+    .location-btn:hover {
+      background: #4338ca;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+    }
+    
+    .location-btn:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -197,21 +220,25 @@
     <p class="subtitle">Importez un fichier JSON pour visualiser vos données</p>
     
     <div class="upload-section">
-      <div style="margin-bottom: 15px;">
-        <input 
-          type="text" 
-          id="cityInput" 
-          placeholder="Nom de la ville (ex: Cuges)" 
-          style="padding: 12px; border: 2px solid #ddd; border-radius: 6px; min-width: 250px; font-size: 16px;"
-        />
-        <button
-          id="fetchButton"
-          style="padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-left: 10px; transition: background 0.3s;"
-          onmouseover="this.style.background='#4338ca'"
-          onmouseout="this.style.background='#4f46e5'"
-        >
-          📡 Récupérer les données
-        </button>
+      <div style="margin-bottom: 20px;">
+        <p style="font-weight: 600; margin-bottom: 10px; color: #333;">Sélectionnez un emplacement :</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <button class="location-btn" data-lat="43.2761" data-lon="5.6996" data-name="Cuges-les-Pins">
+            📍 Cuges-les-Pins
+          </button>
+          <button class="location-btn" data-lat="48.8566" data-lon="2.3522" data-name="Paris">
+            📍 Paris
+          </button>
+          <button class="location-btn" data-lat="43.2965" data-lon="5.3698" data-name="Marseille">
+            📍 Marseille
+          </button>
+          <button class="location-btn" data-lat="45.7640" data-lon="4.8357" data-name="Lyon">
+            📍 Lyon
+          </button>
+          <button class="location-btn" data-lat="43.6108" data-lon="3.8767" data-name="Montpellier">
+            📍 Montpellier
+          </button>
+        </div>
       </div>
       
       <div style="text-align: center; margin: 10px 0; color: #666; font-weight: 500;">ou</div>
@@ -302,10 +329,9 @@
     let currentData = null;
     
     const fileInput = document.getElementById('fileInput');
-    const cityInput = document.getElementById('cityInput');
-    const fetchButton = document.getElementById('fetchButton');
     const fileName = document.getElementById('fileName');
     const errorMessage = document.getElementById('errorMessage');
+    const locationButtons = document.querySelectorAll('.location-btn');
     const chartContainer = document.getElementById('chartContainer');
     const barChartContainer = document.getElementById('barChartContainer');
     const dataTable = document.getElementById('dataTable');
@@ -386,47 +412,45 @@
       }
     }
     
-    // Gérer le clic sur le bouton "Récupérer les données"
-    fetchButton.addEventListener('click', async () => {
-      const city = cityInput.value.trim();
-      
-      if (!city) {
-        errorMessage.textContent = '❌ Veuillez entrer un nom de ville';
-        errorMessage.classList.remove('hidden');
-        return;
-      }
-      
-      // Réinitialiser l'affichage
-      errorMessage.classList.add('hidden');
-      chartSection.classList.add('hidden');
-      barChartSection.classList.add('hidden');
-      averagesSection.classList.add('hidden');
-      tableSection.classList.add('hidden');
-      statsSection.classList.add('hidden');
-      fileName.textContent = `Chargement des données pour ${city}...`;
-      
-      try {
-        // Appel à l'API backend
-        const response = await fetch(`/api/forecast?city=${encodeURIComponent(city)}`);
+    // Gérer le clic sur les boutons de localisation
+    locationButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const lat = button.getAttribute('data-lat');
+        const lon = button.getAttribute('data-lon');
+        const name = button.getAttribute('data-name');
         
-        if (!response.ok) {
-          throw new Error(`Erreur API: ${response.status}`);
+        // Réinitialiser l'affichage
+        errorMessage.classList.add('hidden');
+        chartSection.classList.add('hidden');
+        barChartSection.classList.add('hidden');
+        averagesSection.classList.add('hidden');
+        tableSection.classList.add('hidden');
+        statsSection.classList.add('hidden');
+        fileName.textContent = `Chargement des données pour ${name}...`;
+        
+        try {
+          // Appel à l'API backend avec latitude et longitude
+          const response = await fetch(`/api/forecast?lat=${lat}&lon=${lon}`);
+          
+          if (!response.ok) {
+            throw new Error(`Erreur API: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          
+          fileName.textContent = `Données: ${name} (${lat}, ${lon})`;
+          await processWeatherData(data);
+          
+        } catch (error) {
+          errorMessage.textContent = `❌ ${error.message}`;
+          errorMessage.classList.remove('hidden');
+          fileName.textContent = '';
         }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error(data.error);
-        }
-        
-        fileName.textContent = `Données: ${city}`;
-        await processWeatherData(data);
-        
-      } catch (error) {
-        errorMessage.textContent = `❌ ${error.message}`;
-        errorMessage.classList.remove('hidden');
-        fileName.textContent = '';
-      }
+      });
     });
     
     // Gérer l'upload de fichier local (conservé pour compatibilité)
