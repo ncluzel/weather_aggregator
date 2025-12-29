@@ -412,7 +412,7 @@ export function createSVGChart(data, options = {}) {
   ${yTicksHTML}
   
   <text x="${width / 2}" y="${height - 10}" text-anchor="middle" font-size="14" font-weight="bold">Axe X ${limits.isXDate ? '(Temps)' : ''}</text>
-  <text x="20" y="${height / 2}" text-anchor="middle" font-size="14" font-weight="bold" transform="rotate(-90, 20, ${height / 2})">Axe Y</text>
+  <text x="20" y="${height / 2}" text-anchor="middle" font-size="14" font-weight="bold" transform="rotate(-90, 20, ${height / 2})">Température</text>
   
   ${midnightMarkers}
   ${connectingLine}
