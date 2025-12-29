@@ -127,6 +127,25 @@
       z-index: 10;
     }
 
+    /* Wrapper pour gérer l'axe fixe */
+    .chart-wrapper {
+      position: relative;
+      display: flex;
+    }
+    
+    .chart-y-axis-fixed {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: white;
+      flex-shrink: 0;
+    }
+    
+    .chart-content-scrollable {
+      overflow-x: auto;
+      flex-grow: 1;
+    }
+
     #averagesTable {
       overflow-x: auto;
       overflow-y: hidden;
@@ -757,6 +776,8 @@
       // Supprimer l'ancien overlay s'il existe
       const oldOverlay = container.querySelector('.y-axis-sticky');
       if (oldOverlay) oldOverlay.remove();
+
+      const marginLeft = 60; // Marge gauche du SVG
       
       // Créer un canvas overlay pour l'axe Y
       const overlay = document.createElement('div');
@@ -765,44 +786,62 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 80px;
+        width: ${marginLeft}px;
         height: ${svg.getAttribute('height')}px;
-        background: white;
+        background: rgba(255, 255, 255, 0.98);
         pointer-events: none;
         z-index: 10;
-        border-right: 2px solid #333;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       `;
       
       // Créer un SVG pour l'axe Y uniquement
       const axisHeight = svg.getAttribute('height');
       const axisSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      axisSvg.setAttribute('width', '80');
+      axisSvg.setAttribute('width', marginLeft);
       axisSvg.setAttribute('height', axisHeight);
       axisSvg.style.cssText = 'display: block;';
       
-      // Copier les éléments de l'axe Y (graduations et labels)
-      const yAxisElements = svg.querySelectorAll('line[x1="55"], line[x1="60"], text[x="50"]');
-      yAxisElements.forEach(el => {
+      // Copier les éléments de l'axe Y (ligne verticale principale)
+      const yAxisLine = svg.querySelector('line[x1="60"][y1]');
+      if (yAxisLine) {
+        const lineClone = yAxisLine.cloneNode(true);
+        axisSvg.appendChild(lineClone);
+      }
+      
+      // Copier les graduations et labels de l'axe Y
+      const yTicks = svg.querySelectorAll('line[x1="55"]');
+      const yLabels = svg.querySelectorAll('text[x="50"]');
+      
+      yTicks.forEach(el => {
         const clone = el.cloneNode(true);
         axisSvg.appendChild(clone);
       });
       
-      // Copier le label "Axe Y"
-      const yLabel = svg.querySelector('text[transform*="rotate(-90"]');
+      yLabels.forEach(el => {
+        const clone = el.cloneNode(true);
+        axisSvg.appendChild(clone);
+      });
+      
+      // Copier le label "Axe Y" ou "Précipitations (mm)"
+      const yLabel = svg.querySelector('text[x="20"]');
       if (yLabel) {
         const labelClone = yLabel.cloneNode(true);
         axisSvg.appendChild(labelClone);
       }
       
       overlay.appendChild(axisSvg);
+      container.style.position = 'relative';
       container.appendChild(overlay);
+
+      // L'overlay commence visible, puis suit le scroll
+      overlay.style.transform = `translateX(0px)`;
       
       // Gérer le scroll pour mettre à jour la position
       container.addEventListener('scroll', () => {
         overlay.style.transform = `translateX(${container.scrollLeft}px)`;
       });
     }
-    
+
   </script>
 </body>
 </html>
