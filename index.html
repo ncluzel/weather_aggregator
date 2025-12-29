@@ -112,6 +112,21 @@
       display: block;
       min-width: 100%;
     }
+
+    #averagesTable {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      padding: 10px;
+    }
+    
+    #averagesTable table {
+      min-width: 800px; /* Largeur minimale pour que le tableau ne soit pas écrasé */
+    }
     
     #dataTable {
       overflow-x: auto;
@@ -285,9 +300,21 @@
         border-right: none;
       }
       
+      /* Tableau de synthèse scrollable sur mobile */
+      #averagesTable {
+        max-width: 100vw;
+        margin-left: -15px;
+        margin-right: -15px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 5px;
+      }
+      
       /* Tableaux responsive */
       #averagesTable table {
         font-size: 0.75em;
+        min-width: 700px; /* Réduit un peu pour mobile mais garde scrollable */
       }
       
       #averagesTable th,
