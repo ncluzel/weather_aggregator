@@ -1,101 +1,489 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Weather aggregator</title>
-
-  <!-- Manifest PWA -->
-  <link rel="manifest" href="/manifest.json" />
-
-  <!-- Couleur de la barre système -->
-  <meta name="theme-color" content="#2563eb" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualiseur de Nuage de Points</title>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
+    * {
       margin: 0;
-      padding: 1rem;
-      background: #f8fafc;
+      padding: 0;
+      box-sizing: border-box;
     }
-
-    h1 {
-      text-align: center;
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
     }
-
-    input, button {
-      font-size: 1rem;
-      padding: 0.6rem;
-      width: 100%;
-      margin-top: 0.5rem;
-    }
-
-    .card {
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       background: white;
-      padding: 1rem;
-      margin-top: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 30px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    
+    .upload-section {
+      background: #f8f9fa;
+      padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    
+    .file-input-wrapper {
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      background: #4f46e5;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .file-input-wrapper:hover {
+      background: #4338ca;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    #fileName {
+      display: inline-block;
+      margin-left: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      border-left: 4px solid #c33;
+    }
+    
+    .section {
+      margin-top: 40px;
+    }
+    
+    .section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4f46e5;
+    }
+    
+    #chartContainer, #barChartContainer {
+      display: block;
+      margin: 20px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      max-width: 100%;
+      width: 100%;
+      /* Amélioration du scroll sur mobile */
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    #chartContainer svg, #barChartContainer svg {
+      display: block;
+      min-width: 100%;
+    }
+    
+    #dataTable {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      background: #4f46e5;
+      color: white;
+      padding: 12px;
+      text-align: left;
+    }
+    
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #4f46e5;
+    }
+    
+    .stat-label {
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #4f46e5;
+    }
+    
+    .temp-toggle {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .temp-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .temp-toggle:active {
+      transform: translateY(0);
     }
   </style>
 </head>
-
 <body>
-  <h1>🌤️ Weather aggregator</h1>
-
-  <input id="city" placeholder="Ville (ex: Paris)" />
-  <button onclick="loadForecast()">Voir les prévisions</button>
-
-  <div id="forecast"></div>
-
-  <script>
-  async function getForecast(city) {
+  <div class="container">
+    <h1>📊 Visualiseur de Nuage de Points</h1>
+    <p class="subtitle">Importez un fichier JSON pour visualiser vos données</p>
+    
+    <div class="upload-section">
+      <div style="margin-bottom: 15px;">
+        <input 
+          type="text" 
+          id="cityInput" 
+          placeholder="Nom de la ville (ex: Cuges)" 
+          style="padding: 12px; border: 2px solid #ddd; border-radius: 6px; min-width: 250px; font-size: 16px;"
+        />
+        <button
+          id="fetchButton"
+          style="padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-left: 10px; transition: background 0.3s;"
+          onmouseover="this.style.background='#4338ca'"
+          onmouseout="this.style.background='#4f46e5'"
+        >
+          📡 Récupérer les données
+        </button>
+      </div>
+      
+      <div style="text-align: center; margin: 10px 0; color: #666; font-weight: 500;">ou</div>
+      
+      <label class="file-input-wrapper">
+        📁 Importer JSON local
+        <input type="file" id="fileInput" accept=".json">
+      </label>
+      <span id="fileName"></span>
+      <div id="errorMessage" class="error hidden"></div>
+    </div>
+    
+    <div id="statsSection" class="section hidden">
+      <h2>📈 Statistiques</h2>
+      <div class="stats" id="statsContainer"></div>
+    </div>
+    
+    <div id="chartSection" class="section hidden">
+      <h2>📉 Graphique - Température</h2>
+      <div id="chartContainer"></div>
+    </div>
+    
+    <div id="barChartSection" class="section hidden">
+      <h2>📊 Graphique - Précipitations</h2>
+      <div id="barChartContainer"></div>
+    </div>
+    
+    <div id="averagesSection" class="section hidden">
+      <h2>📊 Synthèse météorologique par tranche horaire</h2>
+      <div id="averagesTable"></div>
+    </div>
+    
+    <div id="tableSection" class="section hidden">
+      <h2>📋 Données</h2>
+      <div id="dataTable"></div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { 
+      loadJSONFile, 
+      normalizeData, 
+      createSVGChart,
+      createBarChart,
+      createDataTable,
+      calculateAxisLimits,
+      calculateTimeSlotAverages,
+      calculatePrecipitationSums,
+      calculateHumidityAverages,
+      calculateWindGustsAverages,
+      createConsolidatedTable
+    } from './scatterPlot.js';
+    
+    // ========================================
+    // CONFIGURATION - Noms des clés dans votre JSON
+    // ========================================
+    const keyConfig = {
+      xKey: 'openmeteo.hourly.time',
+      yKey: 'openmeteo.hourly.temperature_2m',
+      labelsKey: 'openmeteo.hourly.wind_direction_10m'
+    };
+    
+    const keyConfigApparent = {
+      xKey: 'openmeteo.hourly.time',
+      yKey: 'openmeteo.hourly.apparent_temperature',  // Température ressentie
+      labelsKey: 'openmeteo.hourly.wind_direction_10m'
+    };
+    
+    const keyConfigPrecipitation = {
+      xKey: 'openmeteo.hourly.time',
+      yKey: 'openmeteo.hourly.precipitation',
+      labelsKey: 'openmeteo.hourly.time'
+    };
+    
+    const keyConfigHumidity = {
+      xKey: 'openmeteo.hourly.time',
+      yKey: 'openmeteo.hourly.relative_humidity_2m',
+      labelsKey: 'openmeteo.hourly.time'
+    };
+    
+    const keyConfigWindGusts = {
+      xKey: 'openmeteo.hourly.time',
+      yKey: 'openmeteo.hourly.wind_gusts_10m',  // Rafales de vent
+      labelsKey: 'openmeteo.hourly.time'
+    };
+    // ========================================
+    
+    let currentData = null;
+    
+    const fileInput = document.getElementById('fileInput');
+    const cityInput = document.getElementById('cityInput');
+    const fetchButton = document.getElementById('fetchButton');
+    const fileName = document.getElementById('fileName');
+    const errorMessage = document.getElementById('errorMessage');
+    const chartContainer = document.getElementById('chartContainer');
+    const barChartContainer = document.getElementById('barChartContainer');
+    const dataTable = document.getElementById('dataTable');
+    const averagesTable = document.getElementById('averagesTable');
+    const statsContainer = document.getElementById('statsContainer');
+    const chartSection = document.getElementById('chartSection');
+    const barChartSection = document.getElementById('barChartSection');
+    const averagesSection = document.getElementById('averagesSection');
+    const tableSection = document.getElementById('tableSection');
+    const statsSection = document.getElementById('statsSection');
+    
+    // Fonction pour traiter les données (commune pour API et fichier local)
+    async function processWeatherData(rawData) {
       try {
-          const response = await fetch(`/api/forecast?city=${city}`);
-          if (!response.ok) throw new Error("Erreur API");
-          const data = await response.json();
-          return data;
-      } catch (err) {
-          console.error(err);
-          return null;
+        currentData = rawData;
+        
+        const normalizedData = normalizeData(rawData, keyConfig);
+        const normalizedDataPrecipitation = normalizeData(rawData, keyConfigPrecipitation);
+        const normalizedDataHumidity = normalizeData(rawData, keyConfigHumidity);
+        const normalizedDataApparent = normalizeData(rawData, keyConfigApparent);
+        const normalizedDataWind = normalizeData(rawData, keyConfigWindGusts);
+        
+        // Calculer les statistiques
+        const limits = calculateAxisLimits(normalizedData, { yMargin: 0 });
+        displayStats(normalizedData, limits);
+        
+        // Créer et afficher le graphique de température
+        const svg = createSVGChart(normalizedData, {
+          height: 600,
+          pointRadius: 12,
+          pixelsPerTick: 80,
+          showValueInPoint: true,
+          colorByValue: true,
+          strokeWidth: 2,
+          strokeColor: '#000000',
+          lineWidth: 3,
+          lineColor: '#9ca3af',
+          lineBorderWidth: 1,
+          lineBorderColor: '#000000'
+        });
+        chartContainer.innerHTML = svg;
+        chartSection.classList.remove('hidden');
+        
+        // Créer et afficher l'histogramme des précipitations
+        const barSvg = createBarChart(normalizedDataPrecipitation, {
+          height: 300,
+          barColor: '#3b82f6',
+          pixelsPerTick: 80
+        });
+        barChartContainer.innerHTML = barSvg;
+        barChartSection.classList.remove('hidden');
+        
+        // Calculer toutes les données pour le tableau consolidé
+        const tempsAvgs = calculateTimeSlotAverages(normalizedData);
+        const tempsApparentAvgs = calculateTimeSlotAverages(normalizedDataApparent);
+        const precipSums = calculatePrecipitationSums(normalizedDataPrecipitation);
+        const humidityAvgs = calculateHumidityAverages(normalizedDataHumidity);
+        const windAvgs = calculateWindGustsAverages(normalizedDataWind);
+        
+        // Créer et afficher le tableau consolidé
+        const consolidatedTable = createConsolidatedTable({
+          temps: tempsAvgs,
+          tempsApparent: tempsApparentAvgs,
+          precip: precipSums,
+          humidity: humidityAvgs,
+          wind: windAvgs
+        });
+        averagesTable.innerHTML = consolidatedTable;
+        averagesSection.classList.remove('hidden');
+        
+        // Créer et afficher le tableau
+        const table = createDataTable(normalizedData);
+        dataTable.innerHTML = table;
+        tableSection.classList.remove('hidden');
+        
+      } catch (error) {
+        throw error;
       }
-  }
-  </script>
-
-  <script>
-  function displayForecast(data) {
-      const container = document.getElementById("forecast");
-      container.innerHTML = ""; // vider le contenu précédent
-
-      if (!data) {
-          container.innerHTML = "<p>Impossible de récupérer les prévisions.</p>";
-          return;
+    }
+    
+    // Gérer le clic sur le bouton "Récupérer les données"
+    fetchButton.addEventListener('click', async () => {
+      const city = cityInput.value.trim();
+      
+      if (!city) {
+        errorMessage.textContent = '❌ Veuillez entrer un nom de ville';
+        errorMessage.classList.remove('hidden');
+        return;
       }
-
-      // Exemple : affichage des 48 premières heures WeatherAPI
-      if (data.weatherapi && data.weatherapi.forecast) {
-          const hours = data.weatherapi.forecast.forecastday.flatMap(day => day.hour);
-          hours.forEach(hour => {
-              const div = document.createElement("div");
-              div.innerHTML = `
-                  <strong>${hour.time}</strong> :
-                  Température : ${hour.temp_c}°C,
-                  Condition : ${hour.condition.text}
-              `;
-              container.appendChild(div);
-          });
+      
+      // Réinitialiser l'affichage
+      errorMessage.classList.add('hidden');
+      chartSection.classList.add('hidden');
+      barChartSection.classList.add('hidden');
+      averagesSection.classList.add('hidden');
+      tableSection.classList.add('hidden');
+      statsSection.classList.add('hidden');
+      fileName.textContent = `Chargement des données pour ${city}...`;
+      
+      try {
+        // Appel à l'API backend
+        const response = await fetch(`/api/forecast?city=${encodeURIComponent(city)}`);
+        
+        if (!response.ok) {
+          throw new Error(`Erreur API: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        fileName.textContent = `Données: ${city}`;
+        await processWeatherData(data);
+        
+      } catch (error) {
+        errorMessage.textContent = `❌ ${error.message}`;
+        errorMessage.classList.remove('hidden');
+        fileName.textContent = '';
       }
-  }
+    });
+    
+    // Gérer l'upload de fichier local (conservé pour compatibilité)
+    fileInput.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Réinitialiser l'affichage
+      errorMessage.classList.add('hidden');
+      chartSection.classList.add('hidden');
+      barChartSection.classList.add('hidden');
+      averagesSection.classList.add('hidden');
+      tableSection.classList.add('hidden');
+      statsSection.classList.add('hidden');
+      fileName.textContent = `Fichier: ${file.name}`;
+      
+      try {
+        // Charger et normaliser les données avec les clés configurées
+        const rawData = await loadJSONFile(file);
+        fileName.textContent = `Fichier: ${file.name}`;
+        
+        await processWeatherData(rawData);
+        
+      } catch (error) {
+        errorMessage.textContent = `❌ ${error.message}`;
+        errorMessage.classList.remove('hidden');
+      }
+    });
+    
+    function displayStats(data, limits) {
+      const avgX = data.reduce((sum, p) => sum + p.x, 0) / data.length;
+      const avgY = data.reduce((sum, p) => sum + p.y, 0) / data.length;
+      
+      statsContainer.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Nombre de points</div>
+          <div class="stat-value">${data.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">X min / max</div>
+          <div class="stat-value">${limits.minX.toFixed(1)} / ${limits.maxX.toFixed(1)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Y min / max</div>
+          <div class="stat-value">${limits.minY.toFixed(1)} / ${limits.maxY.toFixed(1)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Moyenne X</div>
+          <div class="stat-value">${avgX.toFixed(2)}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Moyenne Y</div>
+          <div class="stat-value">${avgY.toFixed(2)}</div>
+        </div>
+      `;
+      statsSection.classList.remove('hidden');
+    }
   </script>
-
-  <script>
-  async function loadForecast() {
-      const city = document.getElementById("city").value;
-      const data = await getForecast(city);
-      displayForecast(data);
-  }
-  </script>
-
 </body>
 </html>
