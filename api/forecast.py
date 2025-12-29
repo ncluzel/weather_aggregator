@@ -63,7 +63,7 @@ class handler(BaseHTTPRequestHandler):
 
         # Construire la réponse combinée
         response_data = {
-            "city": city,
+            "location": f"{lat}, {lon}",
             #"weatherapi": data_weatherapi,
             #"openweather": data_openweather,
             "openmeteo" : data_openmeteo
