@@ -434,6 +434,11 @@
     
     <div id="chartSection" class="section hidden">
       <h2>📉 Graphique - Température</h2>
+      <div style="text-align: center; margin-bottom: 15px;">
+        <button id="tempChartToggle" class="temp-toggle">
+          <span id="tempChartToggleText">🌡️ Température mesurée</span>
+        </button>
+      </div>
       <div id="chartContainer"></div>
     </div>
     
@@ -503,6 +508,7 @@
     // ========================================
     
     let currentData = null;
+    let useApparentTempChart = false; // État du toggle pour le graphique
     
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
@@ -518,11 +524,47 @@
     const averagesSection = document.getElementById('averagesSection');
     const tableSection = document.getElementById('tableSection');
     const statsSection = document.getElementById('statsSection');
+    const tempChartToggle = document.getElementById('tempChartToggle');
+    const tempChartToggleText = document.getElementById('tempChartToggleText');
+    
+    // Fonction pour mettre à jour le graphique de température
+    function updateTemperatureChart() {
+      if (!currentData) return;
+      
+      const config = useApparentTempChart ? keyConfigApparent : keyConfig;
+      const normalizedData = normalizeData(currentData, config);
+      
+      const svg = createSVGChart(normalizedData, {
+        height: 600,
+        pointRadius: 12,
+        pixelsPerTick: 40,
+        showValueInPoint: true,
+        colorByValue: true,
+        strokeWidth: 2,
+        strokeColor: '#000000',
+        lineWidth: 3,
+        lineColor: '#9ca3af',
+        lineBorderWidth: 1,
+        lineBorderColor: '#000000'
+      });
+      chartContainer.innerHTML = svg;
+    }
+    
+    // Gérer le clic sur le bouton toggle du graphique
+    tempChartToggle.addEventListener('click', () => {
+      useApparentTempChart = !useApparentTempChart;
+      tempChartToggleText.textContent = useApparentTempChart 
+        ? '🌡️ Température ressentie' 
+        : '🌡️ Température mesurée';
+      updateTemperatureChart();
+    });
     
     // Fonction pour traiter les données (commune pour API et fichier local)
     async function processWeatherData(rawData) {
       try {
         currentData = rawData;
+        useApparentTempChart = false; // Réinitialiser le toggle à chaque chargement
+        tempChartToggleText.textContent = '🌡️ Température mesurée';
         
         const normalizedData = normalizeData(rawData, keyConfig);
         const normalizedDataPrecipitation = normalizeData(rawData, keyConfigPrecipitation);
