@@ -511,7 +511,7 @@
         const svg = createSVGChart(normalizedData, {
           height: 600,
           pointRadius: 12,
-          pixelsPerTick: 80,
+          pixelsPerTick: 40,  // Réduit de 80 à 40 pour afficher 8h au lieu de 4h
           showValueInPoint: true,
           colorByValue: true,
           strokeWidth: 2,
@@ -528,7 +528,7 @@
         const barSvg = createBarChart(normalizedDataPrecipitation, {
           height: 300,
           barColor: '#3b82f6',
-          pixelsPerTick: 80
+          pixelsPerTick: 40  // Même réduction pour garder la cohérence
         });
         barChartContainer.innerHTML = barSvg;
         barChartSection.classList.remove('hidden');
