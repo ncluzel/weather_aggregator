@@ -108,7 +108,7 @@ export function normalizeData(data, keyConfig = {}) {
  * @returns {Object} - {minX, maxX, minY, maxY, isXDate}
  */
 export function calculateAxisLimits(data, options = {}) {
-  const { yMargin = 1 } = options; // Marge par défaut de 1
+  const { yMargin = 2 } = options; // Marge par défaut de 1
   
   // Vérifier si x est une date (string au format ISO)
   const isXDate = data.length > 0 && typeof data[0].x === 'string';
