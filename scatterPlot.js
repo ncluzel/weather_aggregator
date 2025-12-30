@@ -263,10 +263,9 @@ export function createSVGChart(data, options = {}) {
       // Jours de la semaine en 3 lettres
       const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
       const dayOfWeek = dayNames[date.getDay()];
-      
-      return { dayOfWeek, date: `${day}/${month}`, time: `${hours}h` };
+      return dayOfWeek;
     }
-    return { simple: value.toFixed(1) };
+    return value.toFixed(1);
   };
   
   // Fonctions de scaling
