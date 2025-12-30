@@ -581,6 +581,11 @@
         lineBorderColor: '#000000'
       });
       chartContainer.innerHTML = svg;
+
+      // Recréer l'axe Y fixe après la mise à jour
+      setTimeout(() => {
+        createStickyYAxis('chartContainer');
+      }, 100);
     }
     
     // Gérer le clic sur le bouton toggle du graphique
