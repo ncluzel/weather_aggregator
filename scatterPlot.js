@@ -327,7 +327,7 @@ export function createSVGChart(data, options = {}) {
     const roundedValue = Math.round(point.y);
     
     let pointSVG = `<circle cx="${cx}" cy="${cy}" r="${pointRadius}" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" opacity="0.9">
-      <title>${point.label}: (${displayX}, ${point.y})</title>
+      <title>${point.label}: ${displayX} - ${point.y}°C</title>
     </circle>`;
     
     if (showValueInPoint) {
