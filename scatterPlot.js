@@ -259,9 +259,14 @@ export function createSVGChart(data, options = {}) {
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const hours = date.getHours().toString().padStart(2, '0');
-      return `${day}/${month} ${hours}h`;
+      
+      // Jours de la semaine en 3 lettres
+      const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+      const dayOfWeek = dayNames[date.getDay()];
+      
+      return { dayOfWeek, date: `${day}/${month}`, time: `${hours}h` };
     }
-    return value.toFixed(1);
+    return { simple: value.toFixed(1) };
   };
   
   // Fonctions de scaling
