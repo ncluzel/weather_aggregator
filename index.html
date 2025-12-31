@@ -610,10 +610,6 @@
         const normalizedDataApparent = normalizeData(rawData, keyConfigApparent);
         const normalizedDataWind = normalizeData(rawData, keyConfigWindGusts);
         
-        // Calculer les statistiques
-        const limits = calculateAxisLimits(normalizedData, { yMargin: 0 });
-        displayStats(normalizedData, limits);
-        
         // Créer et afficher le graphique de température
         const svg = createSVGChart(normalizedData, {
           height: 300,
@@ -663,11 +659,6 @@
         });
         averagesTable.innerHTML = consolidatedTable;
         averagesSection.classList.remove('hidden');
-        
-        // Créer et afficher le tableau
-        const table = createDataTable(normalizedData);
-        dataTable.innerHTML = table;
-        tableSection.classList.remove('hidden');
         
       } catch (error) {
         throw error;
